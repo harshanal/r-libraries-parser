@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>R Package Installer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px; /* Increased width for better visibility */
+      margin: 0 auto;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>R Package Installer</h1>
+    <p>Enter your R script, and click "Find" to extract package installation commands.</p>
+    <textarea id="scriptInput" rows="20" cols="60"></textarea> <!-- Increased rows and cols -->
+    <br>
+    <button onclick="findPackageCommands()">Find</button>
+    <br>
+    <div id="result" style="display: none;">
+      <p>Package Installation Command:</p>
+      <textarea id="packageCommands" rows="5" cols="60"></textarea> <!-- Increased cols -->
+      <p><a href="#" id="copyToClipboard">Copy to Clipboard</a></p>
+    </div>
+  </div>
+
+  <script>
+    function findPackageCommands() {
+      const scriptInput = document.getElementById("scriptInput").value;
+      const packageCommands = extractPackageCommands(scriptInput);
+
+      if (packageCommands) {
+        const result = document.getElementById("result");
+        const packageCommandsText = document.getElementById("packageCommands");
+        result.style.display = "block";
+        packageCommandsText.value = packageCommands;
+        const copyToClipboardLink = document.getElementById("copyToClipboard");
+        copyToClipboardLink.addEventListener("click", function () {
+          packageCommandsText.select();
+          document.execCommand("copy");
+          alert("Command copied to clipboard!");
+        });
+      }
+    }
+
+    function extractPackageCommands(script) {
+      const lines = script.split("\n");
+      const packageNames = [];
+
+      for (let line of lines) {
+        if (line.includes("library(")) {
+          const packageName = line.match(/library\(([^)]+)\)/)[1];
+          if (packageName) {
+            packageNames.push(packageName);
+          }
+        }
+      }
+
+      if (packageNames.length === 0) {
+        alert("No package commands found in the script.");
+        return null;
+      }
+
+      const installCommand = `install.packages(c(${packageNames.map(name => `"${name}"`).join(", ")}))`;
+      return installCommand;
+    }
+  </script>
+</body>
+</html>
